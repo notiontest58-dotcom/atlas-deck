@@ -420,10 +420,11 @@ class Terminal {
             });
 
             this.wss = new this.Websocket({
+                host: "127.0.0.1",
                 port: this.port,
                 clientTracking: true,
                 verifyClient: info => {
-                    if (this.wss.clients.length >= 1) {
+                    if (this.wss.clients.size >= 1) {
                         return false;
                     } else {
                         return true;
