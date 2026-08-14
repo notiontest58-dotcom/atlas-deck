@@ -24,13 +24,31 @@ jobs:
         node-version-file: .nvmrc
         cache: npm
 
-    - name: Setup npm 7
-      run: npm install --global npm@7.24.2
+    - name: Setup npm 8
+      run: npm install --global npm@8.19.4
+
+    - name: Setup Python
+      id: setup-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Configure native build toolchain
+      run: |
+        "npm_config_python=${{ steps.setup-python.outputs.python-path }}" >> $env:GITHUB_ENV
+        "npm_config_msvs_version=2022" >> $env:GITHUB_ENV
 
     - name: Print toolchain versions
       run: |
         node --version
         npm --version
+        python --version
+        $gypPkg = Join-Path (npm root -g) 'npm/node_modules/node-gyp/package.json'
+        if (Test-Path $gypPkg) {
+          node -e "const fs=require('fs');console.log('npm bundled node-gyp: '+JSON.parse(fs.readFileSync(process.argv[1],'utf8')).version)" "$gypPkg"
+        } else {
+          Write-Host "npm bundled node-gyp: not found at $gypPkg"
+        }
 
     - name: Install dependencies
       run: npm ci
